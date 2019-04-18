@@ -94,3 +94,25 @@ protected:
 		}
 	}
 };
+
+template<typename T>
+class my_shared_ptr : public my_ref_count_manager<T>
+{
+
+public:
+	my_shared_ptr():my_ref_count_manager(NULL)
+	{
+
+	}
+
+	//问题1，传入的参数需不需要指定T
+	my_shared_ptr(const my_shared_ptr& other)
+	{
+		
+	}
+
+	my_shared_ptr(my_shared_ptr<T>&& right)
+	{
+
+	}
+};
