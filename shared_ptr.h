@@ -174,7 +174,7 @@ protected:
 
 	//适用于构造shared_ptr对象
 	template<class T2>
-	bool copy_form_weak(const my_weak_ptr<T2>& other)
+	bool construct_from_weak(const my_weak_ptr<T2>& other)
 	{
 		//适用于weak_ptr构造share_ptr，因为管理类的生命周期大于被管理类，所以存在
 		//管理类还存在但是被管理类已经析构也就是use_count为0的情况，此时use_count增加时需要判断下这种情况
