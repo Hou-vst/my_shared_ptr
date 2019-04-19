@@ -201,7 +201,7 @@ protected:
 		m_count_base = other.m_count_base;
 	}
 
-	void DecRef()
+	void Dec_Ref()
 	{
 		if (m_count_base)
 		{
@@ -242,9 +242,15 @@ private:
 template<typename T>
 class my_shared_ptr : public my_ptr_base<T>
 {
+public:
 	my_shared_ptr()
 	{
 
+	}
+
+	~my_shared_ptr()
+	{
+		this->Dec_Ref();
 	}
 
 	my_shared_ptr(T* t)
@@ -274,13 +280,12 @@ class my_shared_ptr : public my_ptr_base<T>
 		return *this;
 	}
 
-	template<class T2>
-	my_shared_ptr& operator=(const my_shared_ptr<T2>& right)
+	template<typename T2>
+	my_shared_ptr(const my_weak_ptr<T2>& other)
 	{
-		my_shared_ptr(right).swap(*this);
-
-		return *this;
+		this->construct_from_weak(other);
 	}
+
 
 	my_shared_ptr(my_shared_ptr&& right)
 	{
@@ -315,18 +320,62 @@ public:
 
 	}
 
-	my_weak_ptr(T* t)
+	~my_weak_ptr()
 	{
-
+		this->Dec_weak_Ref();
 	}
+
+	//弱引用只能指向智能指针对象
+	//my_weak_ptr(T* t)
+	//{
+	//
+	//}
 
 	my_weak_ptr(const my_weak_ptr& other)
 	{
 		Weakly_construct_from(other);
 	}
 
+	my_weak_ptr& operator = (const my_weak_ptr& other)
+	{
+		my_weak_ptr(other).swap(*this);
+		return *this;
+	}
+
+	template<typename T2>
+	my_weak_ptr(const my_shared_ptr<T2>& other)
+	{
+		this->Weakly_construct_from(other);
+	}
+
+	my_weak_ptr& operator = (const my_shared_ptr& other)
+	{
+		my_weak_ptr(other).swap(*this);
+
+		return *this;
+	}
+
 	my_weak_ptr(my_weak_ptr&& right)
 	{
 		move_construct_from(std::move(right));
+	}
+
+	my_weak_ptr& operator = (my_weak_ptr&& right)
+	{
+		my_weak_ptr(right).swap(*this);
+		return *this;
+	}
+
+	my_shared_ptr<T> lock()
+	{
+		my_shared_ptr<T> shared;
+
+		shared.construct_from_weak(*this);
+		return shared;
+	}
+
+	bool expired()
+	{
+		return this->use_count() == 0;
 	}
 };
